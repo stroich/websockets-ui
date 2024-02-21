@@ -1,6 +1,6 @@
 import { Users } from 'type/type';
 
-class DB {
+class DBUsers {
   private readonly users: Users;
 
   constructor() {
@@ -43,4 +43,4 @@ class DB {
   }
 }
 
-export const db = new DB();
+export const dbUsers = new DBUsers();

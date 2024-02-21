@@ -1,12 +1,18 @@
-import { db } from '../data/users';
-import { createResponseToRegistration } from 'helpers/response';
+import { dbUsers } from '../data/users';
+import {
+  createResponseToRegistration,
+  createResponseToUpdateRoom,
+  createResponseToWinners,
+} from 'helpers/response';
 
 export function messageHandlers(data, ws) {
   switch (data.type) {
     case 'reg':
       const { name, password } = data.data;
-      const user = db.registerUser(name, password);
+      const user = dbUsers.registerUser(name, password);
       ws.send(createResponseToRegistration(name, user));
+      ws.send(createResponseToWinners());
+      ws.send(createResponseToUpdateRoom());
       break;
 
     default:
