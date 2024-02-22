@@ -4,7 +4,6 @@ export function parseJson(data: string) {
     result.data = JSON.parse(result.data);
     return result;
   } catch (error) {
-    console.error('Error:', error);
-    return;
+    return JSON.parse(data);
   }
 }

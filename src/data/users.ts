@@ -1,4 +1,4 @@
-import { Users } from 'type/type';
+import { User, Users } from 'type/Users';
 
 class DBUsers {
   private readonly users: Users;
@@ -7,15 +7,24 @@ class DBUsers {
     this.users = [];
   }
 
-  getUser(index: number) {
+  findUser(name: string, password: string): User | undefined {
+    for (const user of this.users) {
+      if (user.name === name && user.password === password) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  getUser(index: number): User {
     return this.users.find((user) => user.index === index);
   }
 
-  registerUser(name: string, password: string) {
+  registerUser(name: string, password: string, id: number) {
     const user = {
       name,
       password,
-      index: Date.now(),
+      index: id,
       wins: 0,
     };
 

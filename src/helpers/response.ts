@@ -1,7 +1,7 @@
 import { dbRooms } from 'data/rooms';
 import { dbUsers } from '../data/users';
 import { ResponseToWinners, ResponseUser } from '../type/Users';
-import { User } from '../type/type';
+import { User } from '../type/Users';
 import { stringifyJson } from './stringifyJson';
 import { ResponseUpdateRoomType } from 'type/Rooms';
 

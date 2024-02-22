@@ -1,8 +1,5 @@
-export type User = {
-  name: string;
-  password: string;
-  index: number;
-  wins: number;
-};
+import { WebSocket } from 'ws';
 
-export type Users = Array<User>;
+export interface BSWebSocket extends WebSocket {
+  id: number;
+}

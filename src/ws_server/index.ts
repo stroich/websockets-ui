@@ -2,6 +2,7 @@ import { parseJson } from 'helpers/parseJson';
 import { WS_PORT } from '../constants/constants';
 import { WebSocketServer } from 'ws';
 import { messageHandlers } from 'handlers/handlers';
+import { BSWebSocket } from 'type/type';
 
 export const wss = new WebSocketServer(
   {
@@ -12,12 +13,13 @@ export const wss = new WebSocketServer(
   }
 );
 
-wss.on('connection', (client) => {
+wss.on('connection', (client: BSWebSocket) => {
+  client.id = Date.now();
   console.log('New client connected');
 
   client.on('message', (message: string) => {
     const parsedMessage = parseJson(message);
-    messageHandlers(parsedMessage, client);
+    messageHandlers(parsedMessage, client, wss);
   });
 
   client.on('close', () => {
