@@ -17,6 +17,7 @@
     "ignorePatterns": [],
     "rules": {
       "prettier/prettier": "error",
+      "@typescript-eslint/no-explicit-any": "off",
       "no-var": "error",
       "semi": "error",
       "indent": ["error", 2, { "SwitchCase": 1 }],

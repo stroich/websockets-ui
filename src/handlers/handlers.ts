@@ -1,13 +1,15 @@
+import { dbGame } from 'data/game';
 import { dbRooms } from '../data/rooms';
 import { dbUsers } from '../data/users';
 import {
+  createGame,
   createResponseToRegistration,
   createResponseToUpdateRoom,
   createResponseToWinners,
 } from '../helpers/response';
-import { BSWebSocket } from '../type/type';
+import { BSWebSocket, MessageJson } from '../type/type';
 
-export function messageHandlers(data, ws: BSWebSocket, wss) {
+export function messageHandlers(data: MessageJson, ws: BSWebSocket, wss) {
   const user = dbUsers.getUser(ws.id);
 
   switch (data.type) {
@@ -35,10 +37,16 @@ export function messageHandlers(data, ws: BSWebSocket, wss) {
       const { indexRoom } = data.data;
       const isUpdate = dbRooms.updateRoom(indexRoom, ws.id, user.name);
       if (isUpdate) {
-        wss.clients.forEach((client) => {
+        dbRooms.deleteRoom(indexRoom);
+        wss.clients.forEach((client: BSWebSocket) => {
+          client.send(createGame(ws.id));
           client.send(createResponseToUpdateRoom());
         });
       }
+      break;
+
+    case 'add_ships':
+      dbGame.addShips(data.data);
       break;
 
     default:
