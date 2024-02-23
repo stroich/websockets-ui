@@ -3,10 +3,12 @@ import { dbRooms } from '../data/rooms';
 import { dbUsers } from '../data/users';
 import {
   createGame,
+  createResponseToAttack,
   createResponseToRegistration,
   createResponseToUpdateRoom,
   createResponseToWinners,
   startGame,
+  updateTurn,
 } from '../helpers/response';
 import { BSWebSocket, MessageJson } from '../type/type';
 
@@ -39,8 +41,9 @@ export function messageHandlers(data: MessageJson, ws: BSWebSocket, wss) {
       const isUpdate = dbRooms.updateRoom(indexRoom, ws.id, user.name);
       if (isUpdate) {
         dbRooms.deleteRoom(indexRoom);
+        const responseToCreateGame = createGame(ws.id);
         wss.clients.forEach((client: BSWebSocket) => {
-          client.send(createGame(ws.id));
+          client.send(responseToCreateGame);
           client.send(createResponseToUpdateRoom());
         });
       }
@@ -52,14 +55,48 @@ export function messageHandlers(data: MessageJson, ws: BSWebSocket, wss) {
       const isStart = dbGame.startGame(data.data.gameId);
       if (isStart) {
         const responses = startGame(newGame);
+        const idOpponent = responses.find((player) => player.playerId !== ws.id).playerId;
         wss.clients.forEach((client: BSWebSocket) => {
           responses.forEach((res) => {
             if (client.id === res.playerId) {
               client.send(res.response);
+              if (client.id === idOpponent) {
+                client.send(updateTurn(ws.id));
+              }
+              if (client.id === ws.id) {
+                client.send(updateTurn(idOpponent));
+              }
             }
           });
         });
       }
+      break;
+
+    case 'attack':
+      const defendingPlayer = data.data.indexPlayer;
+      const isDefendingPlayer = defendingPlayer === ws.id;
+      if (!isDefendingPlayer) {
+        const isHit = dbGame.checkHit(
+          data.data.gameId,
+          data.data.indexPlayer,
+          data.data.x,
+          data.data.y
+        );
+        console.log(ws.id, defendingPlayer);
+        wss.clients.forEach((client: BSWebSocket) => {
+          if (client.id === defendingPlayer) {
+            const responseAttack = createResponseToAttack(data.data, isHit, ws.id);
+            client.send(responseAttack);
+            client.send(updateTurn(ws.id));
+          }
+          if (client.id === ws.id) {
+            const responseAttack = createResponseToAttack(data.data, isHit, defendingPlayer);
+            client.send(responseAttack);
+            client.send(updateTurn(ws.id));
+          }
+        });
+      }
+
       break;
 
     default:

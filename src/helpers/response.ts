@@ -4,8 +4,9 @@ import { ResponseToWinners, ResponseUser } from '../type/Users';
 import { User } from '../type/Users';
 import { stringifyJson } from './stringifyJson';
 import { ResponseUpdateRoomType } from 'type/Rooms';
-import { ResponseCreateGame } from 'type/type';
+import { ResponseCreateGame, ResponseTurn, ResponseAttack, RequestAttack } from 'type/type';
 import { GameType } from 'type/Game';
+import { AttackStatus } from 'type/enums';
 
 export function createResponseToRegistration(name: string | undefined, user: User) {
   if (name) {
@@ -83,4 +84,35 @@ export function startGame(game: GameType) {
       response: stringifyJson(response),
     };
   });
+}
+
+export function updateTurn(playerId: number) {
+  const responseToUpdateTurn: ResponseTurn = {
+    type: 'turn',
+    data: {
+      currentPlayer: playerId,
+    },
+    id: 0,
+  };
+  return stringifyJson(responseToUpdateTurn);
+}
+
+export function createResponseToAttack(
+  data: RequestAttack,
+  status: AttackStatus,
+  playerId: number
+) {
+  const responseAttack: ResponseAttack = {
+    type: 'attack',
+    data: {
+      position: {
+        x: data.x,
+        y: data.y,
+      },
+      currentPlayer: playerId,
+      status: status,
+    },
+    id: 0,
+  };
+  return stringifyJson(responseAttack);
 }

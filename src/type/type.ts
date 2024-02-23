@@ -1,5 +1,6 @@
 import { WebSocket } from 'ws';
 import { ship } from './Game';
+import { AttackStatus } from './enums';
 
 export interface BSWebSocket extends WebSocket {
   id: number;
@@ -29,6 +30,27 @@ export type ResponseStartGame = {
   id: 0;
 };
 
+export type ResponseTurn = {
+  type: 'turn';
+  data: {
+    currentPlayer: number;
+  };
+  id: 0;
+};
+
+export type ResponseAttack = {
+  type: 'attack';
+  data: {
+    position: {
+      x: number;
+      y: number;
+    };
+    currentPlayer: number;
+    status: AttackStatus;
+  };
+  id: 0;
+};
+
 export type requestPlayer = {
   gameId: number;
   ships: [
@@ -49,4 +71,11 @@ export type RequestAddShips = {
   type: 'add_ships';
   data: requestPlayer;
   id: 0;
+};
+
+export type RequestAttack = {
+  gameId: number;
+  x: number;
+  y: number;
+  indexPlayer: number;
 };

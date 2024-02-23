@@ -11,7 +11,7 @@ export type ship = {
 export type Player = {
   index: number;
   ships: Array<ship>;
-  shots: Array<ship>;
+  shots: Array<number[]>;
 };
 
 export type GameType = {
