@@ -20,6 +20,10 @@ class Rooms {
     return roomId;
   }
 
+  findRoom(roomId: number) {
+    return this.rooms.find((room) => room.roomId === roomId);
+  }
+
   updateRoom(roomId: number, userId: number, name: string): boolean {
     const roomIndex = this.rooms.findIndex((room) => room.roomId === roomId);
     if (roomIndex === -1) {

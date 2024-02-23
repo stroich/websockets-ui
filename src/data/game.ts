@@ -4,8 +4,18 @@ import { AttackStatus } from 'type/enums';
 
 class Game {
   private readonly games: Games;
+  private currentPlayer: number;
   constructor() {
     this.games = [];
+    this.currentPlayer;
+  }
+
+  setCurrentPlayer(player: number) {
+    this.currentPlayer = player;
+  }
+
+  getCurrentPlayer() {
+    return this.currentPlayer;
   }
 
   getAllGame() {

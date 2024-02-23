@@ -56,12 +56,12 @@ export function createResponseToUpdateRoom() {
   return stringifyJson(responseToUpdateRoom);
 }
 
-export function createGame(id: number) {
+export function createGame(idGame: number, idPlayer: number) {
   const responseToUpdateRoom: ResponseCreateGame = {
     type: 'create_game',
     data: {
-      idGame: Date.now(),
-      idPlayer: id,
+      idGame: idGame,
+      idPlayer: idPlayer,
     },
     id: 0,
   };

@@ -39,12 +39,22 @@ export function messageHandlers(data: MessageJson, ws: BSWebSocket, wss) {
     case 'add_user_to_room':
       const { indexRoom } = data.data;
       const isUpdate = dbRooms.updateRoom(indexRoom, ws.id, user.name);
+      const users = dbRooms.findRoom(indexRoom).roomUsers;
+      const oldUser = users.find((user) => user.index !== ws.id).index;
       if (isUpdate) {
         dbRooms.deleteRoom(indexRoom);
-        const responseToCreateGame = createGame(ws.id);
+        const idGame = Date.now();
         wss.clients.forEach((client: BSWebSocket) => {
-          client.send(responseToCreateGame);
-          client.send(createResponseToUpdateRoom());
+          if (client.id === oldUser) {
+            const responseToCreateGame = createGame(idGame, oldUser);
+            client.send(responseToCreateGame);
+            client.send(createResponseToUpdateRoom());
+          }
+          if (client.id === ws.id) {
+            const responseToCreateGame = createGame(idGame, ws.id);
+            client.send(responseToCreateGame);
+            client.send(createResponseToUpdateRoom());
+          }
         });
       }
       break;
@@ -56,15 +66,13 @@ export function messageHandlers(data: MessageJson, ws: BSWebSocket, wss) {
       if (isStart) {
         const responses = startGame(newGame);
         const idOpponent = responses.find((player) => player.playerId !== ws.id).playerId;
+        dbGame.setCurrentPlayer(idOpponent);
         wss.clients.forEach((client: BSWebSocket) => {
           responses.forEach((res) => {
             if (client.id === res.playerId) {
               client.send(res.response);
-              if (client.id === idOpponent) {
+              if (client.id === idOpponent || client.id === ws.id) {
                 client.send(updateTurn(ws.id));
-              }
-              if (client.id === ws.id) {
-                client.send(updateTurn(idOpponent));
               }
             }
           });
@@ -74,27 +82,18 @@ export function messageHandlers(data: MessageJson, ws: BSWebSocket, wss) {
 
     case 'attack':
       const defendingPlayer = data.data.indexPlayer;
-      const isDefendingPlayer = defendingPlayer === ws.id;
-      if (!isDefendingPlayer) {
-        const isHit = dbGame.checkHit(
-          data.data.gameId,
-          data.data.indexPlayer,
-          data.data.x,
-          data.data.y
-        );
-        console.log(ws.id, defendingPlayer);
+      const opponent = dbGame.getCurrentPlayer();
+      if (opponent !== defendingPlayer) {
+        const isHit = dbGame.checkHit(data.data.gameId, opponent, data.data.x, data.data.y);
+
         wss.clients.forEach((client: BSWebSocket) => {
-          if (client.id === defendingPlayer) {
-            const responseAttack = createResponseToAttack(data.data, isHit, ws.id);
-            client.send(responseAttack);
-            client.send(updateTurn(ws.id));
-          }
-          if (client.id === ws.id) {
+          if (client.id === ws.id || client.id === opponent) {
             const responseAttack = createResponseToAttack(data.data, isHit, defendingPlayer);
             client.send(responseAttack);
-            client.send(updateTurn(ws.id));
+            client.send(updateTurn(opponent));
           }
         });
+        dbGame.setCurrentPlayer(defendingPlayer);
       }
 
       break;
