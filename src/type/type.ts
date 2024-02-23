@@ -1,4 +1,5 @@
 import { WebSocket } from 'ws';
+import { ship } from './Game';
 
 export interface BSWebSocket extends WebSocket {
   id: number;
@@ -15,6 +16,15 @@ export type ResponseCreateGame = {
   data: {
     idGame: number;
     idPlayer: number;
+  };
+  id: 0;
+};
+
+export type ResponseStartGame = {
+  type: 'start_game';
+  data: {
+    ships: Array<ship>;
+    currentPlayerIndex: number;
   };
   id: 0;
 };

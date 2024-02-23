@@ -5,6 +5,7 @@ import { User } from '../type/Users';
 import { stringifyJson } from './stringifyJson';
 import { ResponseUpdateRoomType } from 'type/Rooms';
 import { ResponseCreateGame } from 'type/type';
+import { GameType } from 'type/Game';
 
 export function createResponseToRegistration(name: string | undefined, user: User) {
   if (name) {
@@ -64,4 +65,22 @@ export function createGame(id: number) {
     id: 0,
   };
   return stringifyJson(responseToUpdateRoom);
+}
+
+export function startGame(game: GameType) {
+  const players = game.players;
+  return players.map((el) => {
+    const response = {
+      type: 'start_game',
+      data: {
+        ships: el.ships,
+        currentPlayerIndex: el.index,
+      },
+      id: 0,
+    };
+    return {
+      playerId: el.index,
+      response: stringifyJson(response),
+    };
+  });
 }

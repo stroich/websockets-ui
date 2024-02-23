@@ -15,10 +15,10 @@ class Game {
     return this.games.find((game) => game.gameId === gameId);
   }
 
-  addShips(data: requestPlayer) {
+  addShips(data: requestPlayer, id: number) {
     const game = this.findGame(data.gameId);
     const player: Player = {
-      index: data.indexPlayer,
+      index: id,
       ships: data.ships,
       shots: [],
     };
@@ -31,6 +31,11 @@ class Game {
       };
       this.games.push(game);
     }
+  }
+
+  startGame(gameId: number) {
+    const game = this.findGame(gameId);
+    return game.players.length === 2;
   }
 }
 

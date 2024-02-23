@@ -6,6 +6,7 @@ import {
   createResponseToRegistration,
   createResponseToUpdateRoom,
   createResponseToWinners,
+  startGame,
 } from '../helpers/response';
 import { BSWebSocket, MessageJson } from '../type/type';
 
@@ -46,7 +47,19 @@ export function messageHandlers(data: MessageJson, ws: BSWebSocket, wss) {
       break;
 
     case 'add_ships':
-      dbGame.addShips(data.data);
+      dbGame.addShips(data.data, ws.id);
+      const newGame = dbGame.findGame(data.data.gameId);
+      const isStart = dbGame.startGame(data.data.gameId);
+      if (isStart) {
+        const responses = startGame(newGame);
+        wss.clients.forEach((client: BSWebSocket) => {
+          responses.forEach((res) => {
+            if (client.id === res.playerId) {
+              client.send(res.response);
+            }
+          });
+        });
+      }
       break;
 
     default:
