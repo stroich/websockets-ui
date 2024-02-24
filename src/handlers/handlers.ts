@@ -3,8 +3,6 @@ import { dbRooms } from '../data/rooms';
 import { dbUsers } from '../data/users';
 import {
   createGame,
-  createResponseToAttack,
-  createResponseToFinish,
   createResponseToRegistration,
   createResponseToUpdateRoom,
   createResponseToWinners,
@@ -12,8 +10,10 @@ import {
   updateTurn,
 } from '../helpers/response';
 import { BSWebSocket, MessageJson } from '../type/type';
+import { wss } from '../ws_server/index';
+import { attack } from './cases/attack';
 
-export function messageHandlers(data: MessageJson, ws: BSWebSocket, wss) {
+export function messageHandlers(data: MessageJson, ws: BSWebSocket) {
   const user = dbUsers.getUser(ws.id);
 
   switch (data.type) {
@@ -82,28 +82,13 @@ export function messageHandlers(data: MessageJson, ws: BSWebSocket, wss) {
       break;
 
     case 'attack':
-      const defendingPlayer = data.data.indexPlayer;
-      const opponent = dbGame.getCurrentPlayer();
-      if (opponent !== defendingPlayer) {
-        const isHit = dbGame.checkHit(data.data.gameId, opponent, data.data.x, data.data.y);
-        const isFinish = dbGame.finishGame(data.data.gameId, opponent);
-        if (isFinish) {
-          dbUsers.addWinner(defendingPlayer);
-        }
-        wss.clients.forEach((client: BSWebSocket) => {
-          if (client.id === ws.id || client.id === opponent) {
-            const responseAttack = createResponseToAttack(data.data, isHit, defendingPlayer);
-            client.send(responseAttack);
-            client.send(updateTurn(opponent));
-          }
-          if (isFinish) {
-            client.send(createResponseToFinish(defendingPlayer));
-            client.send(createResponseToWinners());
-          }
-        });
-        dbGame.setCurrentPlayer(defendingPlayer);
-      }
+      attack(data, ws, data.data.x, data.data.y);
+      break;
 
+    case 'randomAttack':
+      const opponent = dbGame.getCurrentPlayer();
+      const [y, x] = dbGame.findFirstNonNegativeCoord(data.data.gameId, opponent);
+      attack(data, ws, x, y);
       break;
 
     default:

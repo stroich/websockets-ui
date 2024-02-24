@@ -87,3 +87,12 @@ export type ResponseFinish = {
   };
   id: 0;
 };
+
+export type RequestRandomAttack = {
+  type: 'randomAttack';
+  data: {
+    gameId: number;
+    indexPlayer: number;
+  };
+  id: 0;
+};

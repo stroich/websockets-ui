@@ -4,13 +4,7 @@ import { ResponseToWinners, ResponseUser } from '../type/Users';
 import { User } from '../type/Users';
 import { stringifyJson } from './stringifyJson';
 import { ResponseUpdateRoomType } from 'type/Rooms';
-import {
-  ResponseCreateGame,
-  ResponseTurn,
-  ResponseAttack,
-  RequestAttack,
-  ResponseFinish,
-} from 'type/type';
+import { ResponseCreateGame, ResponseTurn, ResponseAttack, ResponseFinish } from 'type/type';
 import { GameType } from 'type/Game';
 import { AttackStatus } from 'type/enums';
 
@@ -104,7 +98,8 @@ export function updateTurn(playerId: number) {
 }
 
 export function createResponseToAttack(
-  data: RequestAttack,
+  x: number,
+  y: number,
   status: AttackStatus,
   playerId: number
 ) {
@@ -112,8 +107,8 @@ export function createResponseToAttack(
     type: 'attack',
     data: {
       position: {
-        x: data.x,
-        y: data.y,
+        x: x,
+        y: y,
       },
       currentPlayer: playerId,
       status: status,

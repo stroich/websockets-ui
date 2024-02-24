@@ -19,7 +19,7 @@ wss.on('connection', (client: BSWebSocket) => {
 
   client.on('message', (message: string) => {
     const parsedMessage = parseJson(message);
-    messageHandlers(parsedMessage, client, wss);
+    messageHandlers(parsedMessage, client);
   });
 
   client.on('close', () => {

@@ -53,7 +53,19 @@ class Game {
       (player) => player.index === playerId
     );
     this.games[indGame].players[indexPlayer].shots[y][x] = -1;
-    console.log(this.games[indGame].players[indexPlayer].shots);
+  }
+
+  findFirstNonNegativeCoord(gameId: number, playerId: number) {
+    const matrix = this.findPlayer(gameId, playerId).shots;
+    for (let i = 0; i < matrix.length; i++) {
+      for (let j = 0; j < matrix[i].length; j++) {
+        if (matrix[i][j] !== -1) {
+          return [i, j];
+        }
+      }
+    }
+
+    return [-1, -1];
   }
 
   countElements(gameId: number, playerId: number) {
@@ -101,7 +113,7 @@ class Game {
     return game.players.length === 2;
   }
 
-  checkHit(gameId: number, playerId: number, x: number, y: number): AttackStatus {
+  checkHit(gameId: number, playerId: number, x: number, y: number): AttackStatus | false {
     const player = this.findPlayer(gameId, playerId);
     let status: AttackStatus;
     const cellValue = player.shots[y][x];
@@ -135,6 +147,8 @@ class Game {
           status = AttackStatus.Killed;
         }
         break;
+      default:
+        return false;
     }
     return status;
   }
