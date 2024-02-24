@@ -4,6 +4,7 @@ import { dbUsers } from '../data/users';
 import {
   createGame,
   createResponseToAttack,
+  createResponseToFinish,
   createResponseToRegistration,
   createResponseToUpdateRoom,
   createResponseToWinners,
@@ -85,12 +86,19 @@ export function messageHandlers(data: MessageJson, ws: BSWebSocket, wss) {
       const opponent = dbGame.getCurrentPlayer();
       if (opponent !== defendingPlayer) {
         const isHit = dbGame.checkHit(data.data.gameId, opponent, data.data.x, data.data.y);
-
+        const isFinish = dbGame.finishGame(data.data.gameId, opponent);
+        if (isFinish) {
+          dbUsers.addWinner(defendingPlayer);
+        }
         wss.clients.forEach((client: BSWebSocket) => {
           if (client.id === ws.id || client.id === opponent) {
             const responseAttack = createResponseToAttack(data.data, isHit, defendingPlayer);
             client.send(responseAttack);
             client.send(updateTurn(opponent));
+          }
+          if (isFinish) {
+            client.send(createResponseToFinish(defendingPlayer));
+            client.send(createResponseToWinners());
           }
         });
         dbGame.setCurrentPlayer(defendingPlayer);

@@ -4,7 +4,13 @@ import { ResponseToWinners, ResponseUser } from '../type/Users';
 import { User } from '../type/Users';
 import { stringifyJson } from './stringifyJson';
 import { ResponseUpdateRoomType } from 'type/Rooms';
-import { ResponseCreateGame, ResponseTurn, ResponseAttack, RequestAttack } from 'type/type';
+import {
+  ResponseCreateGame,
+  ResponseTurn,
+  ResponseAttack,
+  RequestAttack,
+  ResponseFinish,
+} from 'type/type';
 import { GameType } from 'type/Game';
 import { AttackStatus } from 'type/enums';
 
@@ -115,4 +121,15 @@ export function createResponseToAttack(
     id: 0,
   };
   return stringifyJson(responseAttack);
+}
+
+export function createResponseToFinish(playerId: number) {
+  const responseFinish: ResponseFinish = {
+    type: 'finish',
+    data: {
+      winPlayer: playerId,
+    },
+    id: 0,
+  };
+  return stringifyJson(responseFinish);
 }

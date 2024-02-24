@@ -79,3 +79,11 @@ export type RequestAttack = {
   y: number;
   indexPlayer: number;
 };
+
+export type ResponseFinish = {
+  type: 'finish';
+  data: {
+    winPlayer: number;
+  };
+  id: 0;
+};

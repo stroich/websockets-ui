@@ -3,7 +3,7 @@ import { GameType, Games, Player, ship } from '../type/Game';
 import { AttackStatus } from 'type/enums';
 
 class Game {
-  private readonly games: Games;
+  private games: Games;
   private currentPlayer: number;
   constructor() {
     this.games = [];
@@ -22,7 +22,7 @@ class Game {
     return this.games;
   }
 
-  findGame(gameId) {
+  findGame(gameId: number) {
     return this.games.find((game) => game.gameId === gameId);
   }
 
@@ -45,6 +45,36 @@ class Game {
       }
     }
     return field;
+  }
+
+  replaceElement(gameId: number, playerId: number, x: number, y: number) {
+    const indGame = this.games.findIndex((game) => game.gameId === gameId);
+    const indexPlayer = this.games[indGame].players.findIndex(
+      (player) => player.index === playerId
+    );
+    this.games[indGame].players[indexPlayer].shots[y][x] = -1;
+    console.log(this.games[indGame].players[indexPlayer].shots);
+  }
+
+  countElements(gameId: number, playerId: number) {
+    const shots = this.findPlayer(gameId, playerId).shots;
+    const counts = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+    };
+
+    for (let i = 0; i < shots.length; i++) {
+      for (let j = 0; j < shots[0].length; j++) {
+        const element = shots[i][j];
+        if (element >= 1 && element <= 4) {
+          counts[element]++;
+        }
+      }
+    }
+
+    return counts;
   }
 
   addShips(data: requestPlayer, id: number) {
@@ -75,6 +105,8 @@ class Game {
     const player = this.findPlayer(gameId, playerId);
     let status: AttackStatus;
     const cellValue = player.shots[y][x];
+    this.replaceElement(gameId, playerId, x, y);
+    const numberOfShips = this.countElements(gameId, playerId);
     switch (cellValue) {
       case 0:
         status = AttackStatus.Miss;
@@ -83,12 +115,38 @@ class Game {
         status = AttackStatus.Killed;
         break;
       case 2:
+        if (numberOfShips[2] % 2) {
+          status = AttackStatus.Shot;
+        } else {
+          status = AttackStatus.Killed;
+        }
+        break;
       case 3:
+        if (numberOfShips[3] % 3) {
+          status = AttackStatus.Shot;
+        } else {
+          status = AttackStatus.Killed;
+        }
+        break;
       case 4:
-        status = AttackStatus.Shot;
+        if (numberOfShips[4]) {
+          status = AttackStatus.Shot;
+        } else {
+          status = AttackStatus.Killed;
+        }
         break;
     }
     return status;
+  }
+
+  finishGame(gameId: number, playerId: number) {
+    const numberOfShips = this.countElements(gameId, playerId);
+    for (const key in numberOfShips) {
+      if (numberOfShips[key] !== 0) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 export const dbGame = new Game();
