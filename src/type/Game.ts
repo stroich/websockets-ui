@@ -1,3 +1,5 @@
+import { AttackStatus } from './enums';
+
 export type ship = {
   position: {
     x: number;
@@ -20,3 +22,14 @@ export type GameType = {
 };
 
 export type Games = Array<GameType>;
+
+export type HitCoordinates = {
+  x: number;
+  y: number;
+};
+
+export type tableKilled = {
+  x: number;
+  y: number;
+  status: AttackStatus;
+};

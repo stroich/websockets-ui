@@ -1,5 +1,5 @@
 import { requestPlayer } from 'type/type';
-import { GameType, Games, Player, ship } from '../type/Game';
+import { GameType, Games, Player, ship, tableKilled } from '../type/Game';
 import { AttackStatus } from 'type/enums';
 
 class Game {
@@ -89,6 +89,71 @@ class Game {
     return counts;
   }
 
+  attack(
+    matrix: number[][],
+    x: number,
+    y: number,
+    attackedCells: Array<tableKilled>
+  ): Array<tableKilled> {
+    const offsets = [
+      [-1, -1],
+      [-1, 0],
+      [-1, 1],
+      [0, -1],
+      [0, 1],
+      [1, -1],
+      [1, 0],
+      [1, 1],
+      [0, 0],
+    ];
+
+    const neighbours = [];
+    for (const offset of offsets) {
+      const neighbourX = x + offset[0];
+      const neighbourY = y + offset[1];
+      if (neighbourX > -1 && neighbourY > -1 && neighbourX < 10 && neighbourY < 10) {
+        const lenghtShip = matrix[neighbourY][neighbourX];
+        const status = lenghtShip !== 0 ? AttackStatus.Killed : AttackStatus.Miss;
+        const result: tableKilled = { x: neighbourX, y: neighbourY, status: status };
+        const isResultTableKilled = attackedCells.some(
+          (item) => JSON.stringify(item) === JSON.stringify(result)
+        );
+        if (!isResultTableKilled) {
+          neighbours.push({ x: neighbourX, y: neighbourY });
+        }
+      }
+    }
+    neighbours.forEach((neighbour) => {
+      const lenghtShip = matrix[neighbour.y][neighbour.x];
+      const status = lenghtShip !== 0 ? AttackStatus.Killed : AttackStatus.Miss;
+      const result: tableKilled = { x: neighbour.x, y: neighbour.y, status: status };
+      const isResultTableKilled = attackedCells.some(
+        (item) => JSON.stringify(item) === JSON.stringify(result)
+      );
+      if (!isResultTableKilled) {
+        attackedCells.push(result);
+      }
+      if (lenghtShip !== 0) {
+        const newAttackedCells = this.attack(matrix, neighbour.x, neighbour.y, attackedCells);
+        attackedCells = [...attackedCells, ...newAttackedCells];
+      }
+    });
+
+    return attackedCells;
+  }
+
+  findSurroundingCells(gameId: number, playerId: number, sunkenCell: Array<number>) {
+    const ship = this.findPlayer(gameId, playerId).ships;
+    const matrix = this.addShots(ship);
+    const [y, x] = sunkenCell;
+
+    const attackedCells = this.attack(matrix, x, y, []);
+    attackedCells.forEach((el) => {
+      this.replaceElement(gameId, playerId, el.x, el.y);
+    });
+    return attackedCells;
+  }
+
   addShips(data: requestPlayer, id: number) {
     const game = this.findGame(data.gameId);
     const shots = this.addShots(data.ships);
@@ -106,6 +171,11 @@ class Game {
       };
       this.games.push(game);
     }
+  }
+
+  checkShips(gameId: number, playerId: number, x: number, y: number) {
+    const player = this.findPlayer(gameId, playerId);
+    return player.shots[y][x];
   }
 
   startGame(gameId: number) {
