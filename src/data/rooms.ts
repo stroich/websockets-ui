@@ -1,7 +1,7 @@
 import { RoomsType } from '../type/Rooms';
 
 class Rooms {
-  private readonly rooms: RoomsType;
+  private rooms: RoomsType;
   constructor() {
     this.rooms = [];
   }
@@ -51,6 +51,14 @@ class Rooms {
     }
 
     this.rooms.splice(roomIndex, 1);
+  }
+
+  deleteRoomWithCertainUser(userId: number) {
+    const filteredRooms = this.rooms.filter((room) => {
+      return !room.roomUsers.some((user) => user.index === userId);
+    });
+
+    this.rooms = filteredRooms;
   }
 }
 

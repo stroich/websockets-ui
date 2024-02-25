@@ -24,8 +24,7 @@ export function messageHandlers(data: MessageJson, ws: BSWebSocket) {
         const newUser = dbUsers.registerUser(name, password, ws.id);
         ws.send(createResponseToRegistration(name, newUser));
       } else {
-        ws.id = currentUser.index;
-        ws.send(createResponseToRegistration(name, currentUser));
+        ws.send(createResponseToRegistration(undefined, currentUser));
       }
       ws.send(createResponseToWinners());
       ws.send(createResponseToUpdateRoom());

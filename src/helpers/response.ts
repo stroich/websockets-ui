@@ -28,7 +28,7 @@ export function createResponseToRegistration(name: string | undefined, user: Use
         name: null,
         index: null,
         error: true,
-        errorText: 'Parsing error',
+        errorText: 'The client is already logged in',
       },
       id: 0,
     };

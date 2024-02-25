@@ -50,6 +50,11 @@ class DBUsers {
         wins: item.wins,
       }));
   }
+
+  deleteUser(id: number) {
+    const userIndex = this.users.findIndex((user) => user.index === id);
+    this.users.splice(userIndex, 1);
+  }
 }
 
 export const dbUsers = new DBUsers();

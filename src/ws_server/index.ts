@@ -3,6 +3,9 @@ import { WS_PORT } from '../constants/constants';
 import { WebSocketServer } from 'ws';
 import { messageHandlers } from 'handlers/handlers';
 import { BSWebSocket } from 'type/type';
+import { dbUsers } from 'data/users';
+import { dbRooms } from 'data/rooms';
+import { dbGame } from 'data/game';
 
 export const wss = new WebSocketServer(
   {
@@ -23,6 +26,9 @@ wss.on('connection', (client: BSWebSocket) => {
   });
 
   client.on('close', () => {
+    dbUsers.deleteUser(client.id);
+    dbRooms.deleteRoomWithCertainUser(client.id);
+    dbGame.removePlayerFromGame(client.id);
     console.log('Client disconnected');
   });
 });

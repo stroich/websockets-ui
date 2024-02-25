@@ -22,13 +22,13 @@ class Game {
     return this.games;
   }
 
-  findGame(gameId: number) {
-    return this.games.find((game) => game.gameId === gameId);
-  }
-
   findPlayer(gameId: number, playerId: number) {
     const game = this.findGame(gameId);
     return game.players.find((player) => player.index === playerId);
+  }
+
+  findGame(gameId: number) {
+    return this.games.find((game) => game.gameId === gameId);
   }
 
   addShots(ships: Array<ship>) {
@@ -231,6 +231,14 @@ class Game {
       }
     }
     return true;
+  }
+
+  removePlayerFromGame(playerId: number) {
+    const filteredGames = this.games.filter((game) => {
+      return !game.players.some((player) => player.index === playerId);
+    });
+
+    this.games = filteredGames;
   }
 }
 export const dbGame = new Game();
