@@ -41,13 +41,15 @@ export function messageHandlers(data: MessageJson, ws: BSWebSocket) {
       const { indexRoom } = data.data;
       const isUpdate = dbRooms.updateRoom(indexRoom, ws.id, user.name);
       const users = dbRooms.findRoom(indexRoom).roomUsers;
-      const oldUser = users.find((user) => user.index !== ws.id).index;
+
       if (isUpdate) {
+        const oldUser = users.find((user) => user.index !== ws.id);
+        const index = oldUser.index;
         dbRooms.deleteRoom(indexRoom);
         const idGame = Date.now();
         wss.clients.forEach((client: BSWebSocket) => {
-          if (client.id === oldUser) {
-            const responseToCreateGame = createGame(idGame, oldUser);
+          if (client.id === index) {
+            const responseToCreateGame = createGame(idGame, index);
             client.send(responseToCreateGame);
             client.send(createResponseToUpdateRoom());
           }
@@ -57,6 +59,8 @@ export function messageHandlers(data: MessageJson, ws: BSWebSocket) {
             client.send(createResponseToUpdateRoom());
           }
         });
+      } else {
+        console.log('The client is already in the room');
       }
       break;
 

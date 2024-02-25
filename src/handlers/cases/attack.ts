@@ -18,7 +18,6 @@ export function attack(data: MessageJson, ws: BSWebSocket, x: number, y: number)
     const isHit = dbGame.checkHit(data.data.gameId, opponent, x, y);
     if (isHit === AttackStatus.Killed) {
       const listEmptyButton = dbGame.findSurroundingCells(data.data.gameId, opponent, [y, x]);
-      console.log(listEmptyButton);
       const isFinish = dbGame.finishGame(data.data.gameId, opponent);
       if (isFinish) {
         dbUsers.addWinner(defendingPlayer);
