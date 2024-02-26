@@ -6,12 +6,12 @@ import {
   createResponseToRegistration,
   createResponseToUpdateRoom,
   createResponseToWinners,
-  startGame,
-  updateTurn,
 } from '../helpers/response';
 import { BSWebSocket, MessageJson } from '../type/type';
 import { wss } from '../ws_server/index';
 import { attack } from './cases/attack';
+import { singlePlay } from './cases/single_Play';
+import { addShips } from './cases/addShips';
 
 export function messageHandlers(data: MessageJson, ws: BSWebSocket) {
   const user = dbUsers.getUser(ws.id);
@@ -64,24 +64,7 @@ export function messageHandlers(data: MessageJson, ws: BSWebSocket) {
       break;
 
     case 'add_ships':
-      dbGame.addShips(data.data, ws.id);
-      const newGame = dbGame.findGame(data.data.gameId);
-      const isStart = dbGame.startGame(data.data.gameId);
-      if (isStart) {
-        const responses = startGame(newGame);
-        const idOpponent = responses.find((player) => player.playerId !== ws.id).playerId;
-        dbGame.setCurrentPlayer(idOpponent);
-        wss.clients.forEach((client: BSWebSocket) => {
-          responses.forEach((res) => {
-            if (client.id === res.playerId) {
-              client.send(res.response);
-              if (client.id === idOpponent || client.id === ws.id) {
-                client.send(updateTurn(ws.id));
-              }
-            }
-          });
-        });
-      }
+      addShips(data, ws);
       break;
 
     case 'attack':
@@ -92,6 +75,10 @@ export function messageHandlers(data: MessageJson, ws: BSWebSocket) {
       const opponent = dbGame.getCurrentPlayer();
       const [y, x] = dbGame.findFirstNonNegativeCoord(data.data.gameId, opponent);
       attack(data, ws, x, y);
+      break;
+
+    case 'single_play':
+      singlePlay(ws);
       break;
 
     default:

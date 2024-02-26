@@ -9,6 +9,7 @@ import {
 import { BSWebSocket, MessageJson } from 'type/type';
 import { wss } from '../../ws_server/index';
 import { AttackStatus } from 'type/enums';
+import { checkIsBot } from 'helpers/checkIsBot';
 
 export function attack(data: MessageJson, ws: BSWebSocket, x: number, y: number) {
   const defendingPlayer = data.data.indexPlayer;
@@ -38,22 +39,23 @@ export function attack(data: MessageJson, ws: BSWebSocket, x: number, y: number)
       });
       dbGame.setCurrentPlayer(defendingPlayer);
     } else if (isHit) {
-      const isFinish = dbGame.finishGame(data.data.gameId, opponent);
-      if (isFinish) {
-        dbUsers.addWinner(defendingPlayer);
-      }
+      // const isFinish = dbGame.finishGame(data.data.gameId, opponent);
+      // if (isFinish) {
+      //   dbUsers.addWinner(defendingPlayer);
+      // }
       wss.clients.forEach((client: BSWebSocket) => {
         if (client.id === ws.id || client.id === opponent) {
           const responseAttack = createResponseToAttack(x, y, isHit, defendingPlayer);
           client.send(responseAttack);
           client.send(updateTurn(opponent));
         }
-        if (isFinish) {
-          client.send(createResponseToFinish(defendingPlayer));
-          client.send(createResponseToWinners());
-        }
+        // if (isFinish) {
+        //   client.send(createResponseToFinish(defendingPlayer));
+        //   client.send(createResponseToWinners());
+        // }
       });
       dbGame.setCurrentPlayer(defendingPlayer);
     }
+    checkIsBot(ws, data.data.gameId, opponent);
   }
 }

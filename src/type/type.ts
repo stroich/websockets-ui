@@ -53,17 +53,15 @@ export type ResponseAttack = {
 
 export type requestPlayer = {
   gameId: number;
-  ships: [
-    {
-      position: {
-        x: number;
-        y: number;
-      };
-      direction: boolean;
-      length: number;
-      type: 'small' | 'medium' | 'large' | 'huge';
-    },
-  ];
+  ships: Array<{
+    position: {
+      x: number;
+      y: number;
+    };
+    direction: boolean;
+    length: number;
+    type: 'small' | 'medium' | 'large' | 'huge';
+  }>;
   indexPlayer: number;
 };
 
